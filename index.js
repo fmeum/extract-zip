@@ -66,9 +66,8 @@ class Extractor {
           debug('finished processing', entry.fileName)
           this.zipfile.readEntry()
         } catch (err) {
-          this.canceled = true
+          debug('error extracting entry', entry.fileName, err)
           this.zipfile.close()
-          reject(err)
         }
       })
     })
@@ -128,6 +127,10 @@ class Extractor {
       const link = await getStream(readStream)
       debug('creating symlink', link, dest)
       await fs.symlink(link, dest)
+      debug('symlink exists', dest, await fs.lstat(dest))
+      if (link === '100.0.4874.0') {
+        throw new Error('stop')
+      }
     } else {
       await pipeline(readStream, createWriteStream(dest, { mode: procMode }))
     }
